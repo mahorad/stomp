@@ -14,10 +14,16 @@ function setConnected(connected) {
 
 function connect() {
     var socket = new SockJS('/stomp-websocket');
+
+    // create a client
     stompClient = Stomp.over(socket);
+
+    // connect client to stomp server
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
+
+        // client subscribes to a certain destination during connect
         stompClient.subscribe('/dest/sound/play', function (greeting) {
             showGreeting(JSON.parse(greeting.body).content);
         });
@@ -33,7 +39,10 @@ function disconnect() {
 }
 
 function playNote() {
-    stompClient.send("/app/sound/play", {}, JSON.stringify({'note': $("#note").val()}));
+    // client sends SEND to play a sound
+    var playMessage = JSON.stringify({'note': $("#note").val()});
+    console.log('PlayMessage: ' + playMessage)
+    stompClient.send("/app/sound/play", {}, playMessage);
 }
 
 function showGreeting(message) {
