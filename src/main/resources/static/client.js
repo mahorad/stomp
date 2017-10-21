@@ -5,27 +5,21 @@ function setConnected(connected) {
     $("#disconnect").prop("disabled", !connected);
     if (connected) {
         $("#conversation").show();
-    }
-    else {
+    } else {
         $("#conversation").hide();
     }
-    $("#greetings").html("");
+    $("#output").html("");
 }
 
 function connect() {
     var socket = new SockJS('/stomp-websocket');
-
-    // create a client
     stompClient = Stomp.over(socket);
-
-    // connect client to stomp server
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-
-        // client subscribes to a certain destination during connect
-        stompClient.subscribe('/dest/sound/play', function (greeting) {
-            showGreeting(JSON.parse(greeting.body).content);
+        stompClient.subscribe('/dest/sound/state', function (reply) {
+            var msg = JSON.parse(reply.body);
+            showOutput(msg.note + ": " + msg.state);
         });
     });
 }
@@ -38,20 +32,20 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function playNote() {
-    // client sends SEND to play a sound
+function sendPlayMessage() {
     var playMessage = JSON.stringify({'note': $("#note").val()});
-    console.log('PlayMessage: ' + playMessage)
+    console.log('sending play message: ' + playMessage);
+    showOutput("play " + $("#note").val());
     stompClient.send("/app/sound/play", {}, playMessage);
 }
 
-function showGreeting(message) {
-    $("#greetings").append("<tr><td>" + message + "</td></tr>");
+function showOutput(message) {
+    $("#output").append("<tr><td>" + message + "</td></tr>");
 }
 
 $(function () {
     $("form").on('submit', function (e) { e.preventDefault(); });
     $( "#connect" ).click(function() { connect(); });
     $( "#disconnect" ).click(function() { disconnect(); });
-    $( "#send" ).click(function() { playNote(); });
+    $( "#send" ).click(function() { sendPlayMessage(); });
 });
