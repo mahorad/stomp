@@ -17,11 +17,13 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/dest/sound/play', function (reply) {
-            sendStateMessage();
-            showOutput(JSON.parse(reply.body).note);
-            var url = 'https://raw.githubusercontent.com/pffy/mp3-piano-sound/master/mp3/a1.mp3'
-            new Audio(url).play()
+        stompClient.subscribe('/dest/sound/play', function (message) {
+            var playMessage = JSON.parse(message.body);
+            var state = (playMessage.url === 'NotFound' ? 'notFound' : 'playing');
+            var stateMessage = JSON.stringify({'note': playMessage.note, 'state': state});
+            sendStateMessage(stateMessage);
+            showOutput(playMessage.note);
+            new Audio(playMessage.url).play()
         });
     });
 }
@@ -34,10 +36,9 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function sendStateMessage() {
-    var stateMessage = JSON.stringify({'note': 'A#', 'state': 'playing'});
-    console.log('sending state message: ' + stateMessage);
-    stompClient.send("/app/sound/state", {}, stateMessage);
+function sendStateMessage(message) {
+    console.log('sending state message: ' + message);
+    stompClient.send("/app/sound/state", {}, message);
 }
 
 function showOutput(message) {

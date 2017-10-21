@@ -17,9 +17,9 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/dest/sound/state', function (reply) {
-            var msg = JSON.parse(reply.body);
-            showOutput(msg.note + ": " + msg.state);
+        stompClient.subscribe('/dest/sound/state', function (message) {
+            var stateMessage = JSON.parse(message.body);
+            showOutput(stateMessage.note + ": " + stateMessage.state);
         });
     });
 }
@@ -33,14 +33,15 @@ function disconnect() {
 }
 
 function sendPlayMessage() {
-    var playMessage = JSON.stringify({'note': $("#note").val()});
+    var playMessage = JSON.stringify({'note': $("#note").val(), 'url': ''});
     console.log('sending play message: ' + playMessage);
     showOutput("play " + $("#note").val());
     stompClient.send("/app/sound/play", {}, playMessage);
 }
 
 function showOutput(message) {
-    $("#output").append("<tr><td>" + message + "</td></tr>");
+    var nowMillis = new Date().getMilliseconds();
+    $("#output").append("<tr><td>" + nowMillis + ': ' + message + "</td></tr>");
 }
 
 $(function () {
