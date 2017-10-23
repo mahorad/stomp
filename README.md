@@ -19,10 +19,8 @@ mvn spring-boot:run
 
 Having the application running, start two browser tabs with the following addresses:
 
-The instrument cluster client that requests musical notes is found at:
-http://localhost:8080/client.html
+- The instrument cluster client that requests musical notes is found at: http://localhost:8080/client.html
 
-The infotainment panel client to play the requested sounds and replies with updates can be reached at:
-http://localhost:8080/player.html
+- The infotainment panel client to play the requested sounds and replies with updates can be reached at: http://localhost:8080/player.html
 
 Try to connect both clients to the server then from the IC client send musical note string values (e.g. C, C#, E, F, G#)
